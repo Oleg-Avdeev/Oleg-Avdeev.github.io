@@ -172,7 +172,7 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v8</h3>
+    <h3>v9</h3>
 </body>
 
 <script>
@@ -283,6 +283,9 @@
         }
 
         if (isMine(x, y)) {
+
+            let data = getData(x, y);
+            if (data.value == Data.flag) return;
 
             gameStarted = false;
             endScreen.id = 'show';
