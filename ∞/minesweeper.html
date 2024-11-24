@@ -172,7 +172,7 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v7</h3>
+    <h3>v8</h3>
 </body>
 
 <script>
@@ -570,6 +570,10 @@
 
     const mineThreshold = 0.8;
     function isMine(x, y) {
+        
+        if (magnitude({x: firstClick.x - x, y: firstClick.y - y}) < 4)
+            return false;
+        
         return noise2f(Math.abs(x), Math.abs(y)) > mineThreshold;
     }
 
