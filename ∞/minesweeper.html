@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1">
     <title>minesw∞per.</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -200,17 +200,48 @@
     let mouseCell;
     let mousePosition = { x: 0, y: 0 };
 
+    let touchStart = { x: 0, y: 0 };
+    let hasSwipedTooFar = false;
+    let touchStartTime = null;
+    let touchConsumed = false;
+    ontouchstart = (event) => {
+        let touch = event.touches[0];
+        mousePosition = { x: touch.clientX, y: touch.clientY };
+        touchStart = mousePosition;
+        hasSwipedTooFar = false;
+        touchStartTime = Date.now();
+        touchConsumed = false;
+    };
+
+    ontouchmove = (event) => {
+        if (touchConsumed) return;
+        let touch = event.touches[0];
+        mousePosition = { x: touch.clientX, y: touch.clientY };
+
+        let delta = { x: (mousePosition.x - touchStart.x), y: mousePosition.y - touchStart.y }
+        if (magnitude(delta) > 10)
+        {
+            gridOffset.x += delta.x;
+            gridOffset.y += delta.y;
+            touchStart = mousePosition;
+            hasSwipedTooFar = true;
+        }
+    };
+
+    ontouchcancel = (event) => {
+        touchStartTime = null;
+    };
+
+    ontouchend = (event) => {
+        touchStartTime = null;
+        if (!hasSwipedTooFar && !touchConsumed)
+            onmousedown(event);
+    };
+
     onwheel = (event) => {
         event.stopPropagation();
         gridOffset.x -= event.deltaX / 4;
         gridOffset.y -= event.deltaY / 4;
-    };
-
-    ontouchstart = (event) => {};
-    ontouchmove = (event) => {};
-    ontouchcancel = (event) => {};
-    ontouchend = (event) => {
-        onmousedown(ev);
     };
 
     onmousedown = function (ev) {
@@ -265,6 +296,15 @@
     };
 
     setInterval(() => {
+
+        if (touchStartTime && !hasSwipedTooFar && !touchConsumed)
+        {
+            let elapsedTime = Date.now() - touchStartTime;
+            if (elapsedTime > 1000) {
+                touchConsumed = true;
+                onmousedown({button: 2})
+            }
+        }
 
         gridOffset.x += gridSpeed.x;
         gridOffset.y += gridSpeed.y;
@@ -573,6 +613,10 @@
 
     function frac(x) {
         return x - Math.floor(x);
+    }
+
+    function magnitude(v) {
+        return Math.sqrt(v.x * v.x + v.y * v.y);
     }
 
     function hashInt(x) {
