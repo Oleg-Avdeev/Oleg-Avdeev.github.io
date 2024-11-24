@@ -172,11 +172,11 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v6</h3>
+    <h3>v7</h3>
 </body>
 
 <script>
-    
+
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const size = isMobile ? 30 : 20;
     const gap = 4;
@@ -233,8 +233,7 @@
         mousePosition = { x: touch.clientX, y: touch.clientY };
 
         let delta = { x: (mousePosition.x - touchStart.x), y: mousePosition.y - touchStart.y }
-        if (hasSwipedTooFar || magnitude(delta) > swipeThreshold)
-        {
+        if (hasSwipedTooFar || magnitude(delta) > swipeThreshold) {
             gridOffset.x += delta.x;
             gridOffset.y += delta.y;
             touchStart = mousePosition;
@@ -311,12 +310,11 @@
 
     setInterval(() => {
 
-        if (touchStartTime && !hasSwipedTooFar && !touchConsumed)
-        {
+        if (touchStartTime && !hasSwipedTooFar && !touchConsumed) {
             let elapsedTime = Date.now() - touchStartTime;
             if (elapsedTime > flagThreshold * 1000) {
                 touchConsumed = true;
-                onmousedown({button: 2})
+                onmousedown({ button: 2 })
             }
         }
 
@@ -644,6 +642,13 @@
         x ^= (x >>> 15)
         return x
     }
+
+    window.addEventListener("load", function () {
+        setTimeout(function () {
+            // This hides the address bar:
+            window.scrollTo(0, 1);
+        }, 0);
+    });
 
 </script>
 
