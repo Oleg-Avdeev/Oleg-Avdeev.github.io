@@ -97,6 +97,15 @@
         transition-delay: 1s;
     }
 
+    h3 {
+        position: absolute;
+        padding: 0;
+        margin: 0;
+        right: 0;
+        bottom: 0;
+        color: #00000079;
+    }
+
     svg {
         width: 100%;
         height: 100%;
@@ -163,10 +172,12 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
+    <h3>v5</h3>
 </body>
 
 <script>
-    const size = 20;
+    const isMobile = navigator.userAgentData.mobile;
+    const size = isMobile ? 30 : 20;
     const gap = 4;
 
     let gridOffset = getRandomStartingPosition();
@@ -204,6 +215,8 @@
     let hasSwipedTooFar = false;
     let touchStartTime = null;
     let touchConsumed = false;
+    const swipeThreshold = 10;
+    const flagThreshold = 0.7;
     ontouchstart = (event) => {
         let touch = event.touches[0];
         mousePosition = { x: touch.clientX, y: touch.clientY };
@@ -219,7 +232,7 @@
         mousePosition = { x: touch.clientX, y: touch.clientY };
 
         let delta = { x: (mousePosition.x - touchStart.x), y: mousePosition.y - touchStart.y }
-        if (magnitude(delta) > 10)
+        if (hasSwipedTooFar || magnitude(delta) > swipeThreshold)
         {
             gridOffset.x += delta.x;
             gridOffset.y += delta.y;
@@ -300,7 +313,7 @@
         if (touchStartTime && !hasSwipedTooFar && !touchConsumed)
         {
             let elapsedTime = Date.now() - touchStartTime;
-            if (elapsedTime > 1000) {
+            if (elapsedTime > flagThreshold * 1000) {
                 touchConsumed = true;
                 onmousedown({button: 2})
             }
