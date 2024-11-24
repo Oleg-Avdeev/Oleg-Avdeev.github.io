@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>minesw∞per.</title>
+</head>
+
+<style>
+    html {
+        overflow: hidden;
+        scroll-behavior: none;
+
+        --one: #0a5cff;
+        --two: #00904c;
+        --three: #ff0000;
+        --four: #0009a9;
+        --five: #983a00;
+        --six: #00a094;
+        --seven: #000000;
+        --eight: #949494;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+
+    h1 {
+        position: absolute;
+        text-align: center;
+        width: 100%;
+        left: 0;
+        top: 10%;
+
+        font-size: 98pt;
+        font-family: math;
+        font-weight: 900;
+    }
+
+    h1#hide {
+        color: #0000;
+        top: 0%;
+        transition: all 1s ease 0s;
+    }
+
+    h1#show {
+        color: #000;
+        top: 10%;
+    }
+
+    h2 {
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #000000;
+        color: #ffffff00;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    h2#show {
+        color: #ffffff;
+        background-color: #000000;
+        transition: color 1s ease 0s;
+        transition-delay: 1s;
+    }
+
+    h2#hide {
+        color: #ffffff00;
+        background-color: #00000000;
+        transition: all 2s ease 0s;
+        transition-delay: 1s;
+    }
+
+    svg {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+
+        background-position-x: 0;
+        background-position-y: 0;
+        background-size: 24px 24px;
+        background-image:
+            linear-gradient(to right, #e9e9e9 2px, transparent 2px),
+            linear-gradient(to bottom, #e9e9e9 2px, transparent 2px);
+    }
+
+    rect {
+        fill: color(srgb 0 0 0 / 0.12);
+    }
+
+    rect#flag {
+        fill: color(srgb 0 0 0 / 0);
+    }
+
+    text {
+        font: bold 20px sans-serif;
+    }
+
+    text#v1 {
+        fill: var(--one);
+    }
+
+    text#v2 {
+        fill: var(--two);
+    }
+
+    text#v3 {
+        fill: var(--three);
+    }
+
+    text#v4 {
+        fill: var(--four);
+    }
+
+    text#v5 {
+        fill: var(--five);
+    }
+
+    text#v6 {
+        fill: var(--six);
+    }
+
+    text#v7 {
+        fill: var(--seven);
+    }
+
+    text#v8 {
+        fill: var(--eight);
+    }
+
+    text#flag {
+        fill: var(--eight);
+    }
+</style>
+
+<body oncontextmenu="return false;">
+    <svg></svg>
+    <h1 id='show'>minesw∞per.</h1>
+    <h2 id='hide'>and every night i dream of</h2>
+</body>
+
+<script>
+
+    const neighbourOffsets = [
+        { x: -1, y: 0 },
+        { x: -1, y: -1 },
+        { x: -1, y: +1 },
+
+        { x: 0, y: +1 },
+        { x: 0, y: -1 },
+
+        { x: +1, y: 0 },
+        { x: +1, y: -1 },
+        { x: +1, y: +1 },
+    ];
+
+    const size = 20;
+    const gap = 4;
+    const defaultGridSpeed = { x: 1, y: 0.5 };
+
+    let gridOffset = getRandomStartingPosition();
+    let gridSpeed = defaultGridSpeed;
+
+    let gameStarted = false;
+    let firstClick = { x: 0, y: 0 };
+    let title = document.getElementsByTagName('h1')[0];
+    let endScreen = document.getElementsByTagName('h2')[0];
+
+    let canvas = document.getElementsByTagName('svg')[0];
+    canvas.style.setProperty('background-size', `${size + gap}px ${size + gap}px`)
+
+
+
+    let canvasSize = canvas.getBoundingClientRect();
+    let canvasWidth = canvasSize.width;
+    let canvasHeight = canvasSize.height;
+
+
+    let fullRowCount = Math.floor(canvasWidth / (size + gap));
+    let fullColumnCount = Math.floor(canvasHeight / (size + gap));
+
+    let fullRowWidth = fullRowCount * (size + gap);
+    let fullColumnHeight = fullColumnCount * (size + gap);
+
+    let hangingWidthRemainder = 2 * (size + gap) - (canvasWidth - fullRowWidth);
+    let hangingHeightRemainder = 2 * (size + gap) - (canvasHeight - fullColumnHeight);
+
+    let createdCells = [];
+
+    let mouseCell;
+    let mousePosition = { x: 0, y: 0 };
+
+    onwheel = (event) => {
+        event.stopPropagation();
+
+        gridOffset.x -= event.deltaX / 4;
+        gridOffset.y -= event.deltaY / 4;
+
+    };
+
+    onmousedown = function (ev) {
+
+        let x = mouseCell.x;
+        let y = mouseCell.y;
+
+        if (ev.button == 2) {
+            let data = createData(x, y);
+
+            if (data.value == Data.flag)
+                data.value = Data.none;
+
+            else if (data.value == Data.none)
+                data.value = Data.flag;
+
+            return;
+        }
+
+
+        if (!gameStarted) {
+            title.id = 'hide'
+            gridSpeed = { x: 0, y: 0 };
+            firstClick = { x, y };
+            gameStarted = true;
+        }
+
+        if (isMine(x, y)) {
+
+            gameStarted = false;
+            endScreen.id = 'show';
+            setTimeout(() => {
+
+                title.id = 'show'
+                endScreen.id = 'hide';
+                gridSpeed = defaultGridSpeed;
+                gridOffset = getRandomStartingPosition();
+                allData.length = 0;
+
+            }, 2000)
+        }
+
+        // clicked on an empty cell, explore the region
+        else {
+            exploreCell(x, y, 0);
+        }
+    }
+
+    onmousemove = function (ev) {
+        mousePosition = { x: ev.clientX, y: ev.clientY };
+    };
+
+    setInterval(() => {
+
+        gridOffset.x += gridSpeed.x;
+        gridOffset.y += gridSpeed.y;
+
+        canvas.style.setProperty('background-position-x', gridOffset.x + 'px');
+        canvas.style.setProperty('background-position-y', gridOffset.y + 'px');
+
+        allCells.forEach(c => c.used = false);
+
+        for (let x = 0; x < fullRowCount + 2; x++) {
+            for (let y = 0; y < fullColumnCount + 2; y++) {
+
+                let x_canvas = x * size + (x + 0.75) * gap + gridOffset.x;
+                let y_canvas = y * size + (y + 0.75) * gap + gridOffset.y;
+
+                let x_looped = x_canvas;
+                let y_looped = y_canvas;
+                let x_adjusted = x;
+                let y_adjusted = y;
+
+                while (x_looped > canvasWidth) {
+                    x_looped = x_looped - canvasWidth;
+                    x_looped = x_looped - hangingWidthRemainder;
+                    x_adjusted -= fullRowCount + 2;
+                }
+
+                while (y_looped > canvasHeight) {
+                    y_looped = y_looped - canvasHeight;
+                    y_looped = y_looped - hangingHeightRemainder;
+                    y_adjusted -= fullColumnCount + 2;
+                }
+
+                let data = getData(x_adjusted, y_adjusted);
+                let showMines = isMine(x_adjusted, y_adjusted) && false;
+
+                if ((data && data.value != Data.none) || showMines) {
+                    let cell = getCell(x_adjusted, y_adjusted);
+                    cell.gridPosition(x_adjusted, y_adjusted);
+                    cell.position(x_looped, y_looped);
+                    cell.data(data);
+                    cell.used = true;
+                }
+            }
+        }
+
+        {
+            if (!mouseCell) {
+                mouseCell = new Cell();
+                mouseCell.used = true;
+            }
+
+            let offsetCellsX = gridOffset.x % (size + gap);
+            let staticCanvasX = mousePosition.x - offsetCellsX;
+            let x = Math.floor(staticCanvasX / (size + gap));
+            let x_looped = x * (size + gap) + offsetCellsX + gap * 0.75;
+
+            let offsetCellsY = gridOffset.y % (size + gap);
+            let staticCanvasY = mousePosition.y - offsetCellsY;
+            let y = Math.floor(staticCanvasY / (size + gap));
+            let y_looped = y * (size + gap) + offsetCellsY + gap * 0.75;
+
+            x -= Math.floor(gridOffset.x / (size + gap));
+            y -= Math.floor(gridOffset.y / (size + gap));
+
+            mouseCell.gridPosition(x, y);
+            mouseCell.position(x_looped, y_looped);
+        }
+
+        allCells.forEach(cell => {
+            if (!cell.used && !cell.pooled) {
+                cell.pooled = true;
+                cell.deactivate();
+                unusedCells.push(cell);
+            }
+        });
+
+    }, 1000 * 1.0 / 120.0);
+
+
+
+    let allData = [];
+    let unusedCells = [];
+    let allCells = [];
+
+    function getCell(x, y) {
+
+        let cell = allCells.find(c => !c.pooled && c.x == x && c.y == y);
+        if (cell)
+            return cell;
+
+        if (unusedCells.length > 0) {
+            cell = unusedCells.pop();
+            cell.pooled = false;
+            cell.activate();
+        }
+        else {
+            cell = new Cell();
+            allCells.push(cell);
+            cell.pooled = false;
+        }
+
+        return cell;
+    }
+
+    function getData(x, y) {
+        let data = allData.find(d => d.x == x && d.y == y);
+        if (data) return data;
+        return null;
+    }
+
+    function createData(x, y) {
+        let data = allData.find(d => d.x == x && d.y == y);
+        if (data) return data;
+
+        data = new Data();
+        data.x = x;
+        data.y = y;
+        allData.push(data);
+        return data;
+    }
+
+    let lastId = 0;
+    class Cell {
+
+        id = 0
+        pooled = false
+        used = false
+        x = null
+        y = null
+
+        constructor() {
+            this.id = lastId++;
+            this.rect = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+            this.rect.setAttribute("width", size);
+            this.rect.setAttribute("height", size);
+            canvas.appendChild(this.rect);
+
+            this.text = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+            this.text.setAttribute("width", size);
+            this.text.setAttribute("height", size);
+            this.text.setAttribute("dominant-baseline", 'middle');
+            this.text.setAttribute("text-anchor", 'middle');
+            this.text.textContent = '';
+            canvas.appendChild(this.text);
+        }
+
+        gridPosition(x, y) {
+            this.x = x;
+            this.y = y;
+
+            // if (isMine(x, y)) this.color({ r: 1, g: 0, b: 0, a: 0.5 });
+            // else this.color({ r: 0, g: 0, b: 0, a: 0.12 });
+
+            // this.color({
+            //     r: frac(x / fullRowCount),
+            //     g: frac(y / fullColumnCount),
+            //     b: 0,
+            //     a: 1
+            // });
+
+            // let color = isMine(x, y) ? 1 : 0;
+            // this.rect.style.setProperty('fill', `color(srgb 0 0 0 / ${color})`);
+        }
+
+        data(data) {
+
+            if (!data || data.value <= 0){
+                this.text.textContent = '';
+                this.rect.id = ``;
+            }
+            else if (data.value == Data.flag) {
+                this.text.textContent = '?';
+                this.rect.id = `flag`;
+                this.text.id = `flag`;
+            }
+            else {
+                this.text.textContent = data.value;
+                this.text.id = `v${data.value}`;
+                this.rect.id = ``;
+            }
+
+        }
+
+        color(color) {
+            this.rect.style.setProperty('fill', `color(srgb ${color.r} ${color.g} ${color.b} / ${color.a})`);
+        }
+
+        position(canvas_x, canvas_y) {
+            this.rect.setAttribute("x", canvas_x);
+            this.rect.setAttribute("y", canvas_y);
+
+            this.text.setAttribute("x", canvas_x + size / 2);
+            this.text.setAttribute("y", canvas_y + size / 2 + gap / 2);
+        }
+
+        activate() {
+            this.rect.setAttribute('visibility', 'visible');
+            this.text.setAttribute('visibility', 'visible');
+        }
+
+        deactivate() {
+            this.rect.setAttribute('visibility', 'hidden');
+            this.text.setAttribute('visibility', 'hidden');
+        }
+    }
+
+    class Data {
+
+        x
+        y
+        static none = -1
+        static zero = 0
+        static flag = 9
+        static mine = 10
+
+        value = -1
+
+        hasNumber() {
+            return this.value >= 0 && this.value <= 8;
+
+        }
+
+        hasFlag() {
+            return this.value == this.flag;
+        }
+    }
+
+
+
+    // -- Game Functions
+    function getRandomStartingPosition() {
+        return {
+            x: 1000 + Math.random() * 10000,
+            y: 1000 + Math.random() * 10000
+        };
+    }
+
+    const mineThreshold = 0.8;
+    function isMine(x, y) {
+        return noise2f(Math.abs(x), Math.abs(y)) > mineThreshold;
+    }
+
+    const maxDepth = 16;
+    function exploreCell(x, y, depth) {
+
+        if (depth >= maxDepth) return;
+
+        let data = createData(x, y);
+
+        if (data.value == Data.none) {
+            minesCount = 0;
+            neighbourOffsets.forEach(offset => {
+                let neighbor_x = x + offset.x;
+                let neighbor_y = y + offset.y;
+                if (isMine(neighbor_x, neighbor_y))
+                    minesCount++;
+            });
+
+            data.value = minesCount;
+
+            if (minesCount == 0) {
+                neighbourOffsets.forEach(offset => {
+                    let neighbor_x = x + offset.x;
+                    let neighbor_y = y + offset.y;
+
+                    setTimeout(() => exploreCell(neighbor_x, neighbor_y, depth + 1), 10);
+
+                });
+            }
+        }
+    }
+    // -- Game Functions
+
+
+
+
+    const UINT_MAX = 4294967295.0
+    const HASH_CONSTANT = 0x7997F879
+    function noise2f(x, y) {
+        return (+(hashInt(y + hashInt(x + HASH_CONSTANT)) >>> 0)) / UINT_MAX
+    }
+
+    function frac(x) {
+        return x - Math.floor(x);
+    }
+
+    function hashInt(x) {
+        x = x | 0
+        x -= (x << 6)
+        x ^= (x >>> 17)
+        x -= (x << 9)
+        x ^= (x << 4)
+        x -= (x << 3)
+        x ^= (x << 10)
+        x ^= (x >>> 15)
+        return x
+    }
+
+</script>
+
+</html>
