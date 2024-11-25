@@ -94,7 +94,7 @@
         color: #ffffff00;
         background-color: #00000000;
         transition: all 2s ease 0s;
-        transition-delay: 1.8s;
+        transition-delay: 1.9s;
     }
 
     h3 {
@@ -176,7 +176,7 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v12</h3>
+    <h3>v13</h3>
 </body>
 
 <script>
@@ -559,8 +559,14 @@
         static current = Level.basic;
 
         static switchLevel() {
-            const typesCount = Level.full + 1;
+            
+            if (lastShownMessage < 3)
+            {
+                Level.current = Level.basic;
+                return;
+            }
 
+            const typesCount = Level.full + 1;
             let next = Math.floor(Math.random() * typesCount);
             if (next != Level.current) Level.current = next;
             else Level.current = (next + 1) % typesCount;
