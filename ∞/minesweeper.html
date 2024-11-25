@@ -94,7 +94,7 @@
         color: #ffffff00;
         background-color: #00000000;
         transition: all 2s ease 0s;
-        transition-delay: 1s;
+        transition-delay: 1.8s;
     }
 
     h3 {
@@ -104,6 +104,10 @@
         right: 0;
         bottom: 0;
         color: #00000079;
+    }
+
+    span#hide {
+        color: #0000;
     }
 
     svg {
@@ -172,7 +176,7 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v10</h3>
+    <h3>v11</h3>
 </body>
 
 <script>
@@ -289,9 +293,11 @@
 
             gameStarted = false;
             endScreen.id = 'show';
-            endScreen.textContent = getRandomEndMessage();
+            animateEndMessage(getRandomEndMessage());
+
             setTimeout(() => {
 
+                Level.switchLevel();
                 title.id = 'show'
                 endScreen.id = 'hide';
                 gridSpeed = getRandomStartingSpeed();
@@ -487,8 +493,17 @@
                 this.text.id = `flag`;
             }
             else {
-                this.text.textContent = data.value;
-                this.text.id = `v${data.value}`;
+                let colorId = data.value;
+                let text = data.value;
+
+                if (Level.current == Level.confused)
+                    colorId = 1 + (colorId + 1) % 8;
+
+                if (Level.current == Level.questions)
+                    text = '?';
+
+                this.text.textContent = text;
+                this.text.id = `v${colorId}`;
                 this.rect.id = ``;
             }
 
@@ -499,11 +514,16 @@
         }
 
         position(canvas_x, canvas_y) {
+
+            let randomOffset = { x: 0, y: 0 };
+            if (Level.current == Level.questions)
+                randomOffset = { x: (1 - 2 * Math.random()), y: (1 - 2 * Math.random()) }
+
             this.rect.setAttribute("x", canvas_x);
             this.rect.setAttribute("y", canvas_y);
 
-            this.text.setAttribute("x", canvas_x + size / 2);
-            this.text.setAttribute("y", canvas_y + size / 2 + gap / 2);
+            this.text.setAttribute("x", canvas_x + size / 2 + randomOffset.x);
+            this.text.setAttribute("y", canvas_y + size / 2 + gap / 2 + randomOffset.y);
         }
 
         activate() {
@@ -514,27 +534,36 @@
         deactivate() {
             this.rect.setAttribute('visibility', 'hidden');
             this.text.setAttribute('visibility', 'hidden');
+            this.lastData = null;
         }
     }
 
     class Data {
-
-        x
-        y
         static none = -1
         static zero = 0
         static flag = 9
         static mine = 10
 
-        value = -1
+        x
+        y
+        value = Data.none
+    }
 
-        hasNumber() {
-            return this.value >= 0 && this.value <= 8;
+    class Level {
+        static basic = 0;
+        static confused = 1;
+        static questions = 2;
+        static empty = 3;
+        static full = 4;
 
-        }
+        static current = Level.basic;
 
-        hasFlag() {
-            return this.value == this.flag;
+        static switchLevel() {
+            const typesCount = Level.full + 1;
+
+            let next = Math.floor(Math.random() * typesCount);
+            if (next != Level.current) Level.current = next;
+            else Level.current = (next + 1) % typesCount;
         }
     }
 
@@ -542,19 +571,43 @@
 
     // -- Game Functions
     const endMessages = [
+        'there are no scores in',
+        'i cant win in',
+        'i fail to move on, i move on to fail in',
         'and every night i dream of',
         'i fall asleep and i am back in',
         'when i close my eyes i see',
         'i wish i could stop thinking of',
         'will i ever see the end of',
-        'i forgot what life was before',
+        'i forgot what life was like before',
         'and then i am back again in',
-        'no matter where i go my shadow is'
+        'no matter where i go my shadow is',
+        'i dont want to fall asleep back into',
+        'one day i will find peace without',
     ];
 
+    let lastShownMessage = 0;
     function getRandomEndMessage() {
-        let i = Math.floor(Math.random() * endMessages.length);
+        if (lastShownMessage < 3)
+            return endMessages[lastShownMessage++];
+
+        let i = Math.floor(2 + Math.random() * (endMessages.length - 2));
         return endMessages[i];
+    }
+
+    "there-are no scores in"
+    function animateEndMessage(message) {
+
+        let fixedMessage = message.replaceAll(' ', ' ');
+        for (let i = 0; i < fixedMessage.length + 1; i++) {
+            let index = i;
+            setTimeout(() => {
+                
+                let accumulatedText = `${fixedMessage.slice(0, index)}<span id='hide'>${fixedMessage.slice(index)}</span>`;
+                endScreen.innerHTML = accumulatedText;
+
+            }, 1000 + i*50)
+        }
     }
 
     function getRandomStartingPosition() {
@@ -572,12 +625,27 @@
     }
 
     const mineThreshold = 0.8;
+    const mineThresholdSparse = 0.7;
+    const mineThresholdTight = 0.1;
+    const safeRadius = 4;
     function isMine(x, y) {
-        
-        if (magnitude({x: firstClick.x - x, y: firstClick.y - y}) < 4)
+
+        const levelSafeRadius = Level.current == Level.empty
+            ? 50
+            : safeRadius;
+
+        if (magnitude({ x: firstClick.x - x, y: firstClick.y - y }) < levelSafeRadius)
             return false;
-        
-        return noise2f(Math.abs(x), Math.abs(y)) > mineThreshold;
+
+        let threshold = mineThreshold;
+
+        if (Level.current == Level.empty)
+            threshold = mineThresholdSparse;
+
+        if (Level.current == Level.full)
+            threshold = mineThresholdTight;
+
+        return noise2f(Math.abs(x), Math.abs(y)) > threshold;
     }
 
     const maxDepth = 16;
@@ -593,7 +661,11 @@
     ];
     function exploreCell(x, y, depth) {
 
-        if (depth >= maxDepth) return;
+        let levelMaxDepth = maxDepth
+        if (Level.current == Level.empty)
+            levelMaxDepth = 3;
+
+        if (depth >= levelMaxDepth) return;
 
         let data = createData(x, y);
 
