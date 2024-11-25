@@ -176,7 +176,7 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v13</h3>
+    <h3>v14</h3>
 </body>
 
 <script>
@@ -188,6 +188,7 @@
     let gridOffset = getRandomStartingPosition();
     let gridSpeed = getRandomStartingSpeed();
 
+    let waitingForEndScreen = false;
     let gameStarted = false;
     let firstClick = { x: 0, y: 0 };
     let title = document.getElementsByTagName('h1')[0];
@@ -266,6 +267,16 @@
         let x = mouseCell.x;
         let y = mouseCell.y;
 
+        if (waitingForEndScreen)
+            return;
+
+        if (!gameStarted) {
+            title.id = 'hide'
+            gridSpeed = { x: 0, y: 0 };
+            firstClick = { x, y };
+            gameStarted = true;
+        }
+
         if (ev.button == 2) {
             let data = createData(x, y);
 
@@ -278,19 +289,12 @@
             return;
         }
 
-
-        if (!gameStarted) {
-            title.id = 'hide'
-            gridSpeed = { x: 0, y: 0 };
-            firstClick = { x, y };
-            gameStarted = true;
-        }
-
         if (isMine(x, y)) {
 
             let data = getData(x, y);
             if (data && data.value == Data.flag) return;
 
+            waitingForEndScreen = true;
             gameStarted = false;
             endScreen.id = 'show';
             animateEndMessage(getRandomEndMessage());
@@ -303,6 +307,9 @@
                 gridSpeed = getRandomStartingSpeed();
                 gridOffset = getRandomStartingPosition();
                 allData.length = 0;
+                setTimeout(() => {
+                    waitingForEndScreen = false;
+                }, 2000)
 
             }, 2000)
         }
@@ -559,9 +566,8 @@
         static current = Level.basic;
 
         static switchLevel() {
-            
-            if (lastShownMessage < 3)
-            {
+
+            if (lastShownMessage < 3) {
                 Level.current = Level.basic;
                 return;
             }
@@ -608,11 +614,11 @@
         for (let i = 0; i < fixedMessage.length + 1; i++) {
             let index = i;
             setTimeout(() => {
-                
+
                 let accumulatedText = `${fixedMessage.slice(0, index)}<span id='hide'>${fixedMessage.slice(index)}</span>`;
                 endScreen.innerHTML = accumulatedText;
 
-            }, 1000 + i*50)
+            }, 1000 + i * 50)
         }
     }
 
