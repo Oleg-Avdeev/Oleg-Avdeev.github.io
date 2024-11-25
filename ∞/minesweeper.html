@@ -176,7 +176,7 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v11</h3>
+    <h3>v12</h3>
 </body>
 
 <script>
@@ -573,6 +573,7 @@
     const endMessages = [
         'there are no scores in',
         'i cant win in',
+        'i can never be sure in',
         'i fail to move on, i move on to fail in',
         'and every night i dream of',
         'i fall asleep and i am back in',
@@ -588,14 +589,13 @@
 
     let lastShownMessage = 0;
     function getRandomEndMessage() {
-        if (lastShownMessage < 3)
+        if (lastShownMessage < 4)
             return endMessages[lastShownMessage++];
 
-        let i = Math.floor(2 + Math.random() * (endMessages.length - 2));
+        let i = Math.floor(3 + Math.random() * (endMessages.length - 3));
         return endMessages[i];
     }
 
-    "there-are no scores in"
     function animateEndMessage(message) {
 
         let fixedMessage = message.replaceAll(' ', ' ');
