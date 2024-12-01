@@ -131,6 +131,10 @@
         fill: color(srgb 0 0 0 / 0);
     }
 
+    rect#mine {
+        fill: rgb(255 206 206);
+    }
+
     text {
         font: bold 20px sans-serif;
     }
@@ -165,6 +169,21 @@
 
     text#v8 {
         fill: var(--eight);
+        animation: color-change 5s infinite;
+    }
+
+    @keyframes color-change {
+        0% {
+            fill: black;
+        }
+
+        50% {
+            fill: rgb(99, 99, 99);
+        }
+
+        100% {
+            fill: black;
+        }
     }
 
     text#flag {
@@ -176,7 +195,7 @@
     <svg></svg>
     <h1 id='show'>minesw∞per.</h1>
     <h2 id='hide'>and every night i dream of</h2>
-    <h3>v14</h3>
+    <h3>v15</h3>
 </body>
 
 <script>
@@ -222,7 +241,7 @@
     let touchStartTime = null;
     let touchConsumed = false;
     const swipeThreshold = 10;
-    const flagThreshold = 0.7;
+    const flagThreshold = 0.5;
     ontouchstart = (event) => {
         let touch = event.touches[0];
         mousePosition = { x: touch.clientX, y: touch.clientY };
@@ -368,6 +387,13 @@
                 let data = getData(x_adjusted, y_adjusted);
                 let showMines = isMine(x_adjusted, y_adjusted) && false;
 
+                if (showMines) {
+                    data = new Data();
+                    data.value = Data.mine;
+                    data.x = x_adjusted;
+                    data.y = y_adjusted;
+                }
+
                 if ((data && data.value != Data.none) || showMines) {
                     let cell = getCell(x_adjusted, y_adjusted);
                     cell.gridPosition(x_adjusted, y_adjusted);
@@ -494,6 +520,10 @@
                 this.text.textContent = '';
                 this.rect.id = ``;
             }
+            else if (data.value == Data.mine) {
+                this.text.textContent = '';
+                this.rect.id = `mine`;
+            }
             else if (data.value == Data.flag) {
                 this.text.textContent = '?';
                 this.rect.id = `flag`;
@@ -504,10 +534,13 @@
                 let text = data.value;
 
                 if (Level.current == Level.confused)
-                    colorId = 1 + (colorId + 1) % 8;
+                    colorId = 1 + (colorId + 1) % 7;
 
                 if (Level.current == Level.questions)
                     text = '?';
+
+                if (data.value == 8)
+                    text = '∞';
 
                 this.text.textContent = text;
                 this.text.id = `v${colorId}`;
@@ -624,8 +657,8 @@
 
     function getRandomStartingPosition() {
         return {
-            x: 1000 + Math.random() * 10000,
-            y: 1000 + Math.random() * 10000
+            x: 5000 + Math.random() * 10000,
+            y: 5000 + Math.random() * 10000
         };
     }
 
@@ -637,13 +670,13 @@
     }
 
     const mineThreshold = 0.8;
-    const mineThresholdSparse = 0.7;
-    const mineThresholdTight = 0.1;
+    const mineThresholdSparse = 0.73;
+    const mineThresholdTight = 0.15;
     const safeRadius = 4;
     function isMine(x, y) {
 
         const levelSafeRadius = Level.current == Level.empty
-            ? 50
+            ? 16
             : safeRadius;
 
         if (magnitude({ x: firstClick.x - x, y: firstClick.y - y }) < levelSafeRadius)
@@ -654,8 +687,11 @@
         if (Level.current == Level.empty)
             threshold = mineThresholdSparse;
 
-        if (Level.current == Level.full)
+        if (Level.current == Level.full) {
             threshold = mineThresholdTight;
+            if (x == firstClick.x) return false;
+            if (y == firstClick.y) return false;
+        }
 
         return noise2f(Math.abs(x), Math.abs(y)) > threshold;
     }
