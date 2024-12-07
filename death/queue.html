@@ -30,6 +30,15 @@
         padding: 0;
     }
 
+    .container {
+        margin: 0;
+        padding: 1em;
+        
+        border-color: rgb(142, 142, 142);
+        border-style: dashed;
+        border-width: 1px;
+    }
+
     .flex {
         display: flex;
         flex-direction: column;
@@ -75,6 +84,10 @@
         top: 0;
     }
 
+    p {
+        margin: 5px;
+        font-size: 11pt;
+    }
 
     .lds-spinner,
     .lds-spinner div,
@@ -210,15 +223,18 @@
 
     <div id="ticket" class="full hide">
         <div class="flex full">
-            <p>thanks for using the automated</p>
-            <p>death queue service!</p>
-            <p></p>
-            <p>=========================</p>
-            <p id="the-number">your queue number is ####</p>
-            <p>=========================</p>
-            <p></p>
-            <p>please take a seat, </p>
-            <p>we'll be with you shortly</p>
+            <div class="container flex">
+                <p>thanks for using the</p>
+                <p>death queue service!</p>
+                <p></p>
+                <p>=========================</p>
+                <p>your queue number is</p>
+                <p id="the-number"># ### ### ###</p>
+                <p>=========================</p>
+                <p></p>
+                <p>please take a seat, </p>
+                <p>we'll be with you shortly</p>
+            </div>
         </div>
     </div>
 </body>
@@ -240,11 +256,11 @@
 
 
     const welcome = document.getElementById('welcome');
-    
+
     const wait = document.getElementById('wait');
     const funFact = document.getElementById('fun-fact');
 
-    
+
     const ticket = document.getElementById('ticket');
     const theNumber = document.getElementById('the-number');
 
@@ -264,29 +280,29 @@
         let funFacts = [
             () => `Fun fact: there are ${i(worldPopuplation)} people on the planet!`,
             () => `Fun fact: every day ${i(deathsPerDay)} people die!`,
-            () => `Did you know: it would take ${i(worldPopuplation/deathsPerDay)} days, or ${i(worldPopuplation/deathsPerDay/365)} years for everybody to die! Please be patient!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Did you know: it would take ${i(worldPopuplation / deathsPerDay)} days, or ${i(worldPopuplation / deathsPerDay / 365)} years for everybody to die! Please be patient!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
             () => `Due to current events, the waiting times might be affected. We apologise for the inconvenience.`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
             () => `Due to current events, the waiting times might be affected. Don't worry, we will get to you as soon as possible!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
             () => `Your request is being processed. Please be patient!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
-            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime) / 1000 / 60 / 60 / 24)} people have died while you wait!`,
         ];
         let funFactIndex = 0;
         let funFactsId = setInterval(() => {
 
             let fact = funFacts[funFactIndex]();
             funFact.textContent = fact;
-            
+
             if (funFactIndex < funFacts.length - 1)
                 funFactIndex++;
 
@@ -308,10 +324,10 @@
             if (guess <= chanceToDieToday) {
                 peopleWhoDiedBeforeYou += 1 + Math.random() * deathsPerDay;
                 peopleWhoDiedBeforeYou = Math.ceil(peopleWhoDiedBeforeYou); //Let's be generous
-                
+
                 let text = i(peopleWhoDiedBeforeYou);
-                theNumber.innerHTML = `your queue number is #<span>${text}</span>`;
-                
+                theNumber.innerHTML = `#<span>${text}</span>`;
+
                 clearInterval(calculationId);
                 clearInterval(funFactsId);
                 finalize();
@@ -328,7 +344,7 @@
         function finalize() {
             wait.classList.add('hide');
             ticket.classList.remove('hide');
-            
+
             window.print();
 
             ticket.classList.add('hide');
