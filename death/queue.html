@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>death queue.</title>
+
+</head>
+
+<style>
+    html,
+    body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        scroll-behavior: none;
+        font-family: sans-serif;
+    }
+
+    .hide {
+        display: none;
+    }
+
+    .full {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .flex {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        align-content: center;
+        justify-content: center;
+    }
+
+    h1 {
+        margin: 5px;
+        font-size: 3em;
+    }
+
+    h2 {
+        margin: 5px;
+    }
+
+    #the-button {
+        margin-top: 1em;
+        padding: 1em;
+        background-color: white;
+        border-color: black;
+        cursor: grab;
+        border-style: dashed;
+        border-width: 2px;
+    }
+
+    #ticket {
+        font-family: 'Courier New', Courier, monospace;
+        color: rgb(35, 35, 35);
+    }
+
+    #the-number span {
+        font-weight: bold;
+    }
+
+    #fun-fact {
+        max-width: 30em;
+    }
+
+    #wait {
+        position: absolute;
+        top: 0;
+    }
+
+
+    .lds-spinner,
+    .lds-spinner div,
+    .lds-spinner div:after {
+        box-sizing: border-box;
+    }
+
+    .lds-spinner {
+        color: currentColor;
+        display: inline-block;
+        position: relative;
+        width: 80px;
+        height: 80px;
+    }
+
+    .lds-spinner div {
+        transform-origin: 40px 40px;
+        animation: lds-spinner 1.2s linear infinite;
+    }
+
+    .lds-spinner div:after {
+        content: " ";
+        display: block;
+        position: absolute;
+        top: 3.2px;
+        left: 36.8px;
+        width: 6.4px;
+        height: 17.6px;
+        border-radius: 20%;
+        background: currentColor;
+    }
+
+    .lds-spinner div:nth-child(1) {
+        transform: rotate(0deg);
+        animation-delay: -1.1s;
+    }
+
+    .lds-spinner div:nth-child(2) {
+        transform: rotate(30deg);
+        animation-delay: -1s;
+    }
+
+    .lds-spinner div:nth-child(3) {
+        transform: rotate(60deg);
+        animation-delay: -0.9s;
+    }
+
+    .lds-spinner div:nth-child(4) {
+        transform: rotate(90deg);
+        animation-delay: -0.8s;
+    }
+
+    .lds-spinner div:nth-child(5) {
+        transform: rotate(120deg);
+        animation-delay: -0.7s;
+    }
+
+    .lds-spinner div:nth-child(6) {
+        transform: rotate(150deg);
+        animation-delay: -0.6s;
+    }
+
+    .lds-spinner div:nth-child(7) {
+        transform: rotate(180deg);
+        animation-delay: -0.5s;
+    }
+
+    .lds-spinner div:nth-child(8) {
+        transform: rotate(210deg);
+        animation-delay: -0.4s;
+    }
+
+    .lds-spinner div:nth-child(9) {
+        transform: rotate(240deg);
+        animation-delay: -0.3s;
+    }
+
+    .lds-spinner div:nth-child(10) {
+        transform: rotate(270deg);
+        animation-delay: -0.2s;
+    }
+
+    .lds-spinner div:nth-child(11) {
+        transform: rotate(300deg);
+        animation-delay: -0.1s;
+    }
+
+    .lds-spinner div:nth-child(12) {
+        transform: rotate(330deg);
+        animation-delay: 0s;
+    }
+
+    @keyframes lds-spinner {
+        0% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+        }
+    }
+</style>
+
+<body>
+    <div id="welcome" class="full">
+        <div class="flex full">
+            <h1>Welcome to the death queue!</h1>
+            <h2>Please, press the button to receive your queue number</h2>
+            <div id="the-button">Print queue number</div>
+        </div>
+    </div>
+
+    <div id="wait" class="full hide">
+        <div class="flex full">
+            <h2>Please, wait</h2>
+            <h3 id="fun-fact"></h3>
+            <div class="lds-spinner">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ticket" class="full hide">
+        <div class="flex full">
+            <p>thanks for using the automated</p>
+            <p>death queue service!</p>
+            <p></p>
+            <p>=========================</p>
+            <p id="the-number">your queue number is ####</p>
+            <p>=========================</p>
+            <p></p>
+            <p>please take a seat, </p>
+            <p>we'll be with you shortly</p>
+        </div>
+    </div>
+</body>
+
+<script>
+
+    console.log('"The Death Queue"');
+    console.log('A piece by Oleg Avdeev.');
+    console.log('');
+    console.log('Each one of us will have to experience death.')
+    console.log('Death would assign us a certain number. An index in the list of all people who have ever died; Just like birth — in some registry of an omnicient observer.');
+    console.log('Objective, detached from moral judgement, ordinal numbers. Perhaps, the only two numbers that can be said to be absolutely true about a person.');
+    console.log('');
+    console.log('I find it difficult, and yet essential, to come to terms with the fact that one day it will be my turn to die.');
+    console.log('');
+    console.log('This piece takes an 8-billion-sided dice, and rolls it for every day till it\'s your turn.');
+    console.log('This might take a while. Please be patient.');
+
+
+
+    const welcome = document.getElementById('welcome');
+    
+    const wait = document.getElementById('wait');
+    const funFact = document.getElementById('fun-fact');
+
+    
+    const ticket = document.getElementById('ticket');
+    const theNumber = document.getElementById('the-number');
+
+    document.getElementById('the-button').onclick = (e) => {
+
+        welcome.classList.add('hide');
+        wait.classList.remove('hide');
+
+        const worldPopuplation = 8.2 * 1000_000_000;
+        let remainingPopulation = worldPopuplation;
+        let deathsPerDay = 170_790;
+
+        let startTime = Date.now();
+        let peopleWhoDiedBeforeYou = 0;
+        let daysPassed = 0;
+
+        let funFacts = [
+            () => `Fun fact: there are ${i(worldPopuplation)} people on the planet!`,
+            () => `Fun fact: every day ${i(deathsPerDay)} people die!`,
+            () => `Did you know: it would take ${i(worldPopuplation/deathsPerDay)} days, or ${i(worldPopuplation/deathsPerDay/365)} years for everybody to die! Please be patient!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Due to current events, the waiting times might be affected. We apologise for the inconvenience.`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Due to current events, the waiting times might be affected. Don't worry, we will get to you as soon as possible!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Your request is being processed. Please be patient!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+            () => `Fun fact: ${i(deathsPerDay * (Date.now() - startTime)/1000/60/60/24)} people have died while you wait!`,
+        ];
+        let funFactIndex = 0;
+        let funFactsId = setInterval(() => {
+
+            let fact = funFacts[funFactIndex]();
+            funFact.textContent = fact;
+            
+            if (funFactIndex < funFacts.length - 1)
+                funFactIndex++;
+
+        }, 5000);
+
+
+        let calculationId = setInterval(() => tryToDieManyTimes(2), 1);
+
+        function tryToDieManyTimes(times) {
+            for (let attempt = 0; attempt < times; attempt++) {
+                if (tryToDie()) return;
+            }
+        }
+
+        function tryToDie() {
+            let chanceToDieToday = deathsPerDay / remainingPopulation;
+            let guess = Math.random();
+
+            if (guess <= chanceToDieToday) {
+                peopleWhoDiedBeforeYou += 1 + Math.random() * deathsPerDay;
+                peopleWhoDiedBeforeYou = Math.ceil(peopleWhoDiedBeforeYou); //Let's be generous
+                
+                let text = i(peopleWhoDiedBeforeYou);
+                theNumber.innerHTML = `your queue number is #<span>${text}</span>`;
+                
+                clearInterval(calculationId);
+                clearInterval(funFactsId);
+                finalize();
+                return true;
+            }
+
+            remainingPopulation -= deathsPerDay;
+
+            peopleWhoDiedBeforeYou += deathsPerDay;
+            daysPassed++;
+            return false;
+        }
+
+        function finalize() {
+            wait.classList.add('hide');
+            ticket.classList.remove('hide');
+            
+            window.print();
+
+            ticket.classList.add('hide');
+            welcome.classList.remove('hide');
+        }
+
+        function i(number) {
+            return Math.ceil(number).toLocaleString(undefined, { maximumFractionDigits: 0 })
+        }
+    };
+
+
+</script>
+
+</html>
