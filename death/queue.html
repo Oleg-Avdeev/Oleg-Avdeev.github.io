@@ -77,6 +77,7 @@
 
     #fun-fact {
         max-width: 30em;
+        padding: 1em;
     }
 
     #wait {
@@ -250,7 +251,7 @@
     console.log('');
     console.log('I find it difficult, and yet essential, to come to terms with the fact that one day it will be my turn to die.');
     console.log('');
-    console.log('This piece takes an 8-billion-sided dice, and rolls it for every day till it\'s your turn.');
+    console.log('This piece takes an 8-billion-sided dice, and rolls it till it\'s your turn.');
     console.log('This might take a while. Please be patient.');
 
 
@@ -347,8 +348,10 @@
 
             window.print();
 
-            ticket.classList.add('hide');
-            welcome.classList.remove('hide');
+            setTimeout(() => {
+                ticket.classList.add('hide');
+                welcome.classList.remove('hide');
+            }, 1000);
         }
 
         function i(number) {
